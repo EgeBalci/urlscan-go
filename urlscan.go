@@ -85,7 +85,7 @@ func (cli *Client) SubmitURL(u, visibility string) (*URLSumbitResponse, error) {
 // task - Parameters for the scan
 // stats - High-level stats about the page
 // brand - Pro Only Detected phishing against specific brands
-func (cli *Client) Search(query string) (*ScanResult, error) {
+func (cli *Client) Search(query string) (*SearchResults, error) {
 
 	validURL, err := url.Parse(fmt.Sprintf("https://urlscan.io/api/v1/search/?q=%s", query))
 	if err != nil {
@@ -121,7 +121,7 @@ func (cli *Client) Search(query string) (*ScanResult, error) {
 		return nil, fmt.Errorf("status code: %d", scode)
 	}
 
-	result := &ScanResult{}
+	result := &SearchResults{}
 	err = json.Unmarshal(resp.Body(), result)
 	if err != nil {
 		return nil, err
