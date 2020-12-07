@@ -1,6 +1,8 @@
-# github.com/andybalholm/brotli v1.0.0
+# github.com/andybalholm/brotli v1.0.1
+## explicit
 github.com/andybalholm/brotli
-# github.com/klauspost/compress v1.10.7
+# github.com/klauspost/compress v1.11.3
+## explicit
 github.com/klauspost/compress/flate
 github.com/klauspost/compress/gzip
 github.com/klauspost/compress/zlib
