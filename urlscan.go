@@ -1,6 +1,7 @@
 package urlscan
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -204,13 +205,21 @@ func (cli *Client) GetDOMTree(uuid string) ([]byte, error) {
 		return nil, fmt.Errorf("status code: %d", scode)
 	}
 
+	// Check that the server actually sent compressed data
+	if bytes.EqualFold(resp.Header.Peek("Content-Encoding"), []byte("gzip")) {
+		body, err := resp.BodyGunzip()
+		if err != nil {
+			return nil, err
+		}
+		return body, nil
+	}
 	return resp.Body(), nil
 
 }
 
 // GetScreenshot retrieves the screenshot from a scan result
 func (cli *Client) GetScreenshot(uuid string) ([]byte, error) {
-	validURL, err := url.Parse(fmt.Sprintf("https://urlscan.io/screenshots/%s.png/", uuid))
+	validURL, err := url.Parse(fmt.Sprintf("https://urlscan.io/screenshots/%s.png", uuid))
 	if err != nil {
 		return nil, err
 	}
@@ -241,6 +250,14 @@ func (cli *Client) GetScreenshot(uuid string) ([]byte, error) {
 		return nil, fmt.Errorf("status code: %d", scode)
 	}
 
+	// Check that the server actually sent compressed data
+	if bytes.EqualFold(resp.Header.Peek("Content-Encoding"), []byte("gzip")) {
+		body, err := resp.BodyGunzip()
+		if err != nil {
+			return nil, err
+		}
+		return body, nil
+	}
 	return resp.Body(), nil
 
 }
@@ -314,22 +331,22 @@ type ScanResult struct {
 					EncodedDataLength int    `json:"encodedDataLength"`
 					Timing            struct {
 						RequestTime              float64 `json:"requestTime"`
-						ProxyStart               int     `json:"proxyStart"`
-						ProxyEnd                 int     `json:"proxyEnd"`
+						ProxyStart               float64 `json:"proxyStart"`
+						ProxyEnd                 float64 `json:"proxyEnd"`
 						DNSStart                 float64 `json:"dnsStart"`
 						DNSEnd                   float64 `json:"dnsEnd"`
 						ConnectStart             float64 `json:"connectStart"`
 						ConnectEnd               float64 `json:"connectEnd"`
-						SslStart                 int     `json:"sslStart"`
-						SslEnd                   int     `json:"sslEnd"`
-						WorkerStart              int     `json:"workerStart"`
-						WorkerReady              int     `json:"workerReady"`
-						WorkerFetchStart         int     `json:"workerFetchStart"`
+						SslStart                 float64 `json:"sslStart"`
+						SslEnd                   float64 `json:"sslEnd"`
+						WorkerStart              float64 `json:"workerStart"`
+						WorkerReady              float64 `json:"workerReady"`
+						WorkerFetchStart         float64 `json:"workerFetchStart"`
 						WorkerRespondWithSettled int     `json:"workerRespondWithSettled"`
 						SendStart                float64 `json:"sendStart"`
 						SendEnd                  float64 `json:"sendEnd"`
-						PushStart                int     `json:"pushStart"`
-						PushEnd                  int     `json:"pushEnd"`
+						PushStart                float64 `json:"pushStart"`
+						PushEnd                  float64 `json:"pushEnd"`
 						ReceiveHeadersEnd        float64 `json:"receiveHeadersEnd"`
 					} `json:"timing"`
 					ResponseTime  float64 `json:"responseTime"`
@@ -349,16 +366,16 @@ type ScanResult struct {
 					Name        string `json:"name"`
 				} `json:"asn"`
 				Geoip struct {
-					Range       string `json:"range"`
-					Country     string `json:"country"`
-					Region      string `json:"region"`
-					City        string `json:"city"`
-					Ll          []int  `json:"ll"`
-					Metro       int    `json:"metro"`
-					Area        int    `json:"area"`
-					Eu          string `json:"eu"`
-					Timezone    string `json:"timezone"`
-					CountryName string `json:"country_name"`
+					Range       []string  `json:"range"`
+					Country     string    `json:"country"`
+					Region      string    `json:"region"`
+					City        string    `json:"city"`
+					Ll          []float64 `json:"ll"`
+					Metro       int       `json:"metro"`
+					Area        int       `json:"area"`
+					Eu          string    `json:"eu"`
+					Timezone    string    `json:"timezone"`
+					CountryName string    `json:"country_name"`
 				} `json:"geoip"`
 			} `json:"response"`
 			InitiatorInfo struct {
@@ -484,16 +501,16 @@ type ScanResult struct {
 			DNS struct {
 			} `json:"dns"`
 			Geoip struct {
-				Range       string `json:"range"`
-				Country     string `json:"country"`
-				Region      string `json:"region"`
-				City        string `json:"city"`
-				Ll          []int  `json:"ll"`
-				Metro       int    `json:"metro"`
-				Area        int    `json:"area"`
-				Eu          string `json:"eu"`
-				Timezone    string `json:"timezone"`
-				CountryName string `json:"country_name"`
+				Range       []string `json:"range"`
+				Country     string   `json:"country"`
+				Region      string   `json:"region"`
+				City        string   `json:"city"`
+				Ll          []int    `json:"ll"`
+				Metro       int      `json:"metro"`
+				Area        int      `json:"area"`
+				Eu          string   `json:"eu"`
+				Timezone    string   `json:"timezone"`
+				CountryName string   `json:"country_name"`
 			} `json:"geoip"`
 			Size        int         `json:"size"`
 			EncodedSize int         `json:"encodedSize"`
@@ -511,16 +528,16 @@ type ScanResult struct {
 				Data  []struct {
 					IP    string `json:"ip"`
 					Geoip struct {
-						Range       string `json:"range"`
-						Country     string `json:"country"`
-						Region      string `json:"region"`
-						City        string `json:"city"`
-						Ll          []int  `json:"ll"`
-						Metro       int    `json:"metro"`
-						Area        int    `json:"area"`
-						Eu          string `json:"eu"`
-						Timezone    string `json:"timezone"`
-						CountryName string `json:"country_name"`
+						Range       []string `json:"range"`
+						Country     string   `json:"country"`
+						Region      string   `json:"region"`
+						City        string   `json:"city"`
+						Ll          []int    `json:"ll"`
+						Metro       int      `json:"metro"`
+						Area        int      `json:"area"`
+						Eu          string   `json:"eu"`
+						Timezone    string   `json:"timezone"`
+						CountryName string   `json:"country_name"`
 					} `json:"geoip"`
 				} `json:"data"`
 			} `json:"geoip"`
